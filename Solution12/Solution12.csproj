@@ -1,8 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.0</TargetFramework>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Adfectus" Version="0.0.21" />
+      <PackageReference Include="Adfectus.Platform.DesktopGL" Version="0.0.5" />
+    </ItemGroup>
 
 </Project>
