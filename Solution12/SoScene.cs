@@ -22,6 +22,8 @@ namespace Solution12
     public class SoScene : Scene
     {
         private readonly Random _random = new Random();
+        private bool _gameOver = false;
+
 
         private Vector3 _positionPlayer = new Vector3(50, 100, 0);
         private readonly Vector2 _sizePlayer = new Vector2(10, 10);
@@ -33,7 +35,6 @@ namespace Solution12
 
         private Atlas _atlas;
 
-        private bool _gameOver = false;
 
         public override void Load()
         {
