@@ -2,11 +2,18 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Adfectus.Common;
+using Adfectus.Graphics.Text;
 using Adfectus.Input;
+using Adfectus.IO;
+using Adfectus.Platform.DesktopGL.Assets;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
+using Adfectus.Utility;
 
 namespace Solution12
 {
@@ -18,85 +25,61 @@ namespace Solution12
         private readonly Vector2 _sizePlayer = new Vector2(10, 10);
         private const int MoveStepPlayer = 5;
 
-        private Vector3[] _positionThangs = new Vector3[1]
-        {
-            new Vector3(Engine.Renderer.Camera.Width / 2 - SizeThang.X, Engine.Renderer.Camera.Height / 2 - SizeThang.Y, 1)
-        };
+        private KeyCode _direction = KeyCode.Backspace;
 
-        private static readonly Vector2 SizeThang = new Vector2(7, 7);
-        private const int MoveStepThang = 4;
+        private readonly KeyCode[] _validDirections = new KeyCode[4] {KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.W};
+
+        private Atlas _atlas;
 
         public override void Load()
         {
-//            Console.WriteLine("SoScene - Load");
+            _atlas = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(48);
         }
 
         public override void Update()
         {
-//            Console.WriteLine("SoScene - Update");
-
-            var modX = 0;
-            var modY = 0;
-            foreach (var key in Engine.InputManager.GetAllKeysHeld())
+            foreach (var key in Engine.InputManager.GetAllKeysDown())
             {
-                switch (key)
-                {
-                    case KeyCode.A:
-                        modX -= MoveStepPlayer;
-                        break;
-                    case KeyCode.D:
-                        modX += MoveStepPlayer;
-                        break;
-                    case KeyCode.W:
-                        modY -= MoveStepPlayer;
-                        break;
-                    case KeyCode.S:
-                        modY += MoveStepPlayer;
-                        break;
-                }
+                if (key == _direction || !_validDirections.Contains(key)) return;
+                _direction = key;
             }
 
-            _positionPlayer.X = Math.Clamp(_positionPlayer.X + modX, 0, Engine.Renderer.Camera.Width - _sizePlayer.X);
-            _positionPlayer.Y = Math.Clamp(_positionPlayer.Y + modY, 0, Engine.Renderer.Camera.Height - _sizePlayer.Y);
-
-//            _positionThangs[0].X += _random.Next(-1, 2) * MoveStepThang;
-//            _positionThangs[0].Y += _random.Next(-1, 2) * MoveStepThang;
-
-            for (int i = 0; i < _positionThangs.Length; i++)
+            switch (_direction)
             {
-                switch (i % 6)
-                {
-                    case 0:
-                        _positionThangs[i] = Vector3.Lerp(_positionPlayer, _positionThangs[i], 0.999f);
-                        break;
-                }
-
-//                _positionThangs[i] = Vector3.TransformNormal()
+                case KeyCode.A:
+                    _positionPlayer.X -= MoveStepPlayer;
+                    break;
+                case KeyCode.D:
+                    _positionPlayer.X += MoveStepPlayer;
+                    break;
+                case KeyCode.W:
+                    _positionPlayer.Y -= MoveStepPlayer;
+                    break;
+                case KeyCode.S:
+                    _positionPlayer.Y += MoveStepPlayer;
+                    break;
+                case KeyCode.Backspace:
+                    /* do noting */
+                    break;
+                default: throw new Exception();
             }
 
-//            foreach (var t in _positionThangs)
-//            {
-//                var thang = t;
-//                thang.X = Vector3.Lerp(thang._positionPlayer)
-//                thang.X += _random.Next(-1, 2) * MoveStepThang;
-//                thang.Y += _random.Next(-1, 2) * MoveStepThang;
-//            }
+            _positionPlayer.X = Math.Clamp(_positionPlayer.X, Engine.Renderer.Camera.X + 1, Engine.Renderer.Camera.Width - _sizePlayer.X - 1);
+            _positionPlayer.Y = Math.Clamp(_positionPlayer.Y, Engine.Renderer.Camera.Y + 1, Engine.Renderer.Camera.Height - _sizePlayer.Y - 1);
         }
 
         public override void Draw()
         {
-//            Console.WriteLine("SoScene - Draw");
+            Engine.Renderer.RenderString(_atlas, "WASTED", _positionPlayer, Color.Red);
+
 
             Engine.Renderer.RenderOutline(Engine.Renderer.Camera.Position, Engine.Renderer.Camera.Size, Color.CornflowerBlue);
             Engine.Renderer.Render(_positionPlayer, _sizePlayer, Color.Magenta);
-
-            foreach (var thang in _positionThangs)
-                Engine.Renderer.Render(thang, SizeThang, Color.Pink);
         }
 
         public override void Unload()
         {
-//            Console.WriteLine("SoScene - Unload");
+            Engine.AssetLoader.Destroy("font/ubuntumono-r.ttf");
         }
     }
 }

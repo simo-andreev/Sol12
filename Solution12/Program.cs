@@ -1,4 +1,6 @@
 ﻿using System;
+using Adfectus.Common;
+using Adfectus.Common.Configuration;
 using Adfectus.Implementation;
 using Jint;
 using Engine = Adfectus.Common.Engine;
@@ -10,7 +12,13 @@ namespace Solution12
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            Engine.Setup<Adfectus.Platform.DesktopGL.DesktopPlatform>();
+
+            Engine.Setup<Adfectus.Platform.DesktopGL.DesktopPlatform>(new EngineBuilder()
+                .SetLogger<ErrorConsoleLogger>()
+                .SetupAssets("Assets")
+                .SetupHost("Sol-12", WindowMode.Windowed, resizable: false)
+            );
+
             Engine.SceneManager.SetScene(new SoScene());
             Engine.Run();
         }
