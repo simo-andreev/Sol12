@@ -18,6 +18,7 @@ namespace Solution12
                 .SetLogger<ConsoleLogger>()
                 .SetupAssets("Assets")
                 .SetupHost("Sol-12", WindowMode.Windowed, resizable: true)
+//                .SetupFlags(targetTPS: 1)
             );
 
             Engine.SceneManager.SetScene(new SnekScene());
