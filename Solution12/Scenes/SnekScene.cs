@@ -18,9 +18,20 @@ namespace Solution12.Scenes
         private readonly Stopwatch _updateTimer = new Stopwatch();
 
         // Snek bits and parts
-        private readonly List<Vector3> _cells = new List<Vector3> {new Vector3(10, 10, 0), new Vector3(10, 20, 0), new Vector3(10, 30, 0)};
+        private readonly List<Vector3> _cells = new List<Vector3>();
         private readonly Vector2 _cellSize = new Vector2(10f);
+        
+        
+        // Game-y stuffs
+        private const byte StartingCellCount = 5;
 
+        public SnekScene()
+        {
+            for (byte i = 0; i < StartingCellCount; i++)
+            {
+                _cells.Add(new Vector3(10, _cellSize.Y * i, 0));
+            }
+        }
 
         public override void Load()
         {
