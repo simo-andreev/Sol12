@@ -10,4 +10,18 @@
       <PackageReference Include="Adfectus.Platform.DesktopGL" Version="0.0.5" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Assets\Font\*" />
+      <EmbeddedResource Include="Assets\Font\*.ttf">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="Assets\iMage\*" />
+      <EmbeddedResource Include="Assets\iMage\*.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+    </ItemGroup>
+
 </Project>
