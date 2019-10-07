@@ -10,10 +10,12 @@ using Adfectus.Common;
 using Adfectus.Graphics.Text;
 using Adfectus.Input;
 using Adfectus.IO;
+using Adfectus.Logging;
 using Adfectus.Platform.DesktopGL.Assets;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
 using Adfectus.Utility;
+using SharpFont;
 
 namespace Solution12
 {
@@ -31,6 +33,8 @@ namespace Solution12
 
         private Atlas _atlas;
 
+        private bool _gameOver = false;
+
         public override void Load()
         {
             _atlas = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(48);
@@ -38,6 +42,8 @@ namespace Solution12
 
         public override void Update()
         {
+            if (_gameOver) return;
+
             foreach (var key in Engine.InputManager.GetAllKeysDown())
             {
                 if (key == _direction || !_validDirections.Contains(key)) return;
@@ -64,17 +70,29 @@ namespace Solution12
                 default: throw new Exception();
             }
 
-            _positionPlayer.X = Math.Clamp(_positionPlayer.X, Engine.Renderer.Camera.X + 1, Engine.Renderer.Camera.Width - _sizePlayer.X - 1);
-            _positionPlayer.Y = Math.Clamp(_positionPlayer.Y, Engine.Renderer.Camera.Y + 1, Engine.Renderer.Camera.Height - _sizePlayer.Y - 1);
+//            _positionPlayer.X = Math.Clamp(_positionPlayer.X, Engine.Renderer.Camera.X + 1, Engine.Renderer.Camera.Width - _sizePlayer.X - 1);
+//            _positionPlayer.Y = Math.Clamp(_positionPlayer.Y, Engine.Renderer.Camera.Y + 1, Engine.Renderer.Camera.Height - _sizePlayer.Y - 1);
         }
 
         public override void Draw()
         {
-            Engine.Renderer.RenderString(_atlas, "WASTED", _positionPlayer, Color.Red);
-
-
             Engine.Renderer.RenderOutline(Engine.Renderer.Camera.Position, Engine.Renderer.Camera.Size, Color.CornflowerBlue);
             Engine.Renderer.Render(_positionPlayer, _sizePlayer, Color.Magenta);
+
+            if (!_gameOver)
+            {
+                var boundX = Engine.Renderer.BaseTarget.Size.X;
+                var boundY = Engine.Renderer.BaseTarget.Size.Y;
+
+                if (_positionPlayer.X <= 0 || _positionPlayer.X + _sizePlayer.X >= boundX || _positionPlayer.Y <= 0 || _positionPlayer.Y + _sizePlayer.Y >= boundY)
+                    _gameOver = true;
+
+                Engine.Log.Error($"posX {_positionPlayer.X}, boundX{boundX}", MessageSource.Game);
+            }
+
+            if (!_gameOver) return;
+
+            Engine.Renderer.RenderString(_atlas, "WASTED", _positionPlayer, Color.Red);
         }
 
         public override void Unload()

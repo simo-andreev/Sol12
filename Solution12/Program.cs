@@ -16,7 +16,7 @@ namespace Solution12
             Engine.Setup<Adfectus.Platform.DesktopGL.DesktopPlatform>(new EngineBuilder()
                 .SetLogger<ConsoleLogger>()
                 .SetupAssets("Assets")
-                .SetupHost("Sol-12", WindowMode.Windowed, resizable: false)
+                .SetupHost("Sol-12", WindowMode.Windowed, resizable: true)
             );
 
             Engine.SceneManager.SetScene(new SoScene());
