@@ -1,23 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using Adfectus.Common;
 using Adfectus.Graphics.Text;
 using Adfectus.Input;
-using Adfectus.IO;
 using Adfectus.Logging;
-using Adfectus.Platform.DesktopGL.Assets;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
-using Adfectus.Utility;
-using SharpFont;
 
-namespace Solution12
+namespace Solution12.Scenes
 {
     public class SoScene : Scene
     {

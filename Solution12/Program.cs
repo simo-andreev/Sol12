@@ -3,6 +3,7 @@ using Adfectus.Common;
 using Adfectus.Common.Configuration;
 using Adfectus.Implementation;
 using Jint;
+using Solution12.Scenes;
 using Engine = Adfectus.Common.Engine;
 
 namespace Solution12

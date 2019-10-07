@@ -5,7 +5,7 @@ using Adfectus.Input;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
 
-namespace Solution12
+namespace Solution12.Scenes
 {
     public class TooScene : Scene
     {

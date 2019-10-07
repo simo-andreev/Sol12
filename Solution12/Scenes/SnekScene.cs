@@ -1,38 +1,38 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Numerics;
 using Adfectus.Common;
 using Adfectus.Graphics.Text;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
-using SharpFont;
 
-namespace Solution12
+namespace Solution12.Scenes
 {
     public class SnekScene : Scene
     {
         // Loaded assets
         private Atlas _ubuntuMono;
 
+        // Scene-status-related shit
         private bool _gameOver = false;
-        private Stopwatch updateTimer = new Stopwatch();
+        private readonly Stopwatch _updateTimer = new Stopwatch();
 
+        // Snek bits and parts
+        private readonly List<Vector3> _cells = new List<Vector3> {new Vector3(10, 10, 0), new Vector3(10, 20, 0), new Vector3(10, 30, 0)};
+        private readonly Vector2 _cellSize = new Vector2(10f);
 
-        private List<Vector3> _cells = new List<Vector3> {new Vector3(10, 10, 0), new Vector3(10, 20, 0), new Vector3(10, 30, 0)};
-        private Vector2 _cellSize = new Vector2(10f);
 
         public override void Load()
         {
             _ubuntuMono = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(48);
-            updateTimer.Start();
+            _updateTimer.Start();
         }
 
         public override void Update()
         {
-            if (updateTimer.ElapsedMilliseconds >= 250)
+            if (_updateTimer.ElapsedMilliseconds >= 250)
             {
-                updateTimer.Restart();
+                _updateTimer.Restart();
                 DoStep();
             }
         }
@@ -43,7 +43,7 @@ namespace Solution12
 
             foreach (var cell in _cells)
             {
-                Engine.Renderer.Render(cell, new Vector2(10, 10), Color.Green);
+                Engine.Renderer.Render(cell, _cellSize, Color.Green);
             }
 
             if (_gameOver)
