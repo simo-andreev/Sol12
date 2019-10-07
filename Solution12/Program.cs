@@ -19,7 +19,7 @@ namespace Solution12
                 .SetupHost("Sol-12", WindowMode.Windowed, resizable: true)
             );
 
-            Engine.SceneManager.SetScene(new SoScene());
+            Engine.SceneManager.SetScene(new SnekScene());
             Engine.Run();
         }
     }
