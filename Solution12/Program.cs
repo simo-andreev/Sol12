@@ -14,7 +14,7 @@ namespace Solution12
             Console.WriteLine("Hello World!");
 
             Engine.Setup<Adfectus.Platform.DesktopGL.DesktopPlatform>(new EngineBuilder()
-                .SetLogger<ErrorConsoleLogger>()
+                .SetLogger<ConsoleLogger>()
                 .SetupAssets("Assets")
                 .SetupHost("Sol-12", WindowMode.Windowed, resizable: false)
             );
