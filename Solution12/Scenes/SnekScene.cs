@@ -82,6 +82,7 @@ namespace Solution12.Scenes
                 else // is last cell -> move to new position
                 {
                     var cell = _cells[i];
+                    // ReSharper disable once SwitchStatementMissingSomeCases - I don't really need to _explicitly_ ignore the rest of the keyboard.
                     switch (_activeDirection)
                     {
                         case KeyCode.A:
@@ -122,8 +123,8 @@ namespace Solution12.Scenes
 //            var x = _random.Next((int) (Engine.Renderer.BaseTarget.Size.X - _cellSize.X));
 //            var y = _random.Next((int) (Engine.Renderer.BaseTarget.Size.X - _cellSize.X));
 
-            int xPositionCount = (int) Math.Floor(_gameFieldSize.X / _cellSize.X);
-            int yPositionCount = (int) Math.Floor(_gameFieldSize.Y / _cellSize.Y);
+            var xPositionCount = (int) Math.Floor(_gameFieldSize.X / _cellSize.X);
+            var yPositionCount = (int) Math.Floor(_gameFieldSize.Y / _cellSize.Y);
 
             var x = _random.Next(xPositionCount) * _cellSize.X + _gameFieldPosition.X;
             var y = _random.Next(yPositionCount) * _cellSize.Y + _gameFieldPosition.Y;
@@ -140,11 +141,10 @@ namespace Solution12.Scenes
                 if (IsReverseOfActive(keyCode)) return; // U-turns in place are not allowed
 
                 // TODO - Simo Andreev - 08.09.2019 - NOTE - this prioritises input based on listing order in [_validDirections] 
-                if (Engine.InputManager.IsKeyDown(keyCode))
-                {
-                    _newDirection = keyCode;
-                    return;
-                }
+                if (!Engine.InputManager.IsKeyDown(keyCode)) continue;
+                
+                _newDirection = keyCode;
+                return;
             }
         }
 
@@ -152,15 +152,14 @@ namespace Solution12.Scenes
         {
             if (_activeDirection == null || keyCode == _activeDirection) return false;
 
-            switch (_activeDirection)
+            return _activeDirection switch
             {
-                case KeyCode.A: return keyCode == KeyCode.D;
-                case KeyCode.D: return keyCode == KeyCode.A;
-                case KeyCode.W: return keyCode == KeyCode.S;
-                case KeyCode.S: return keyCode == KeyCode.W;
-            }
-
-            return false;
+                KeyCode.A => (keyCode == KeyCode.D),
+                KeyCode.D => (keyCode == KeyCode.A),
+                KeyCode.W => (keyCode == KeyCode.S),
+                KeyCode.S => (keyCode == KeyCode.W),
+                _ => false
+            };
         }
 
         private void CheckForHostileCollision()
@@ -177,7 +176,7 @@ namespace Solution12.Scenes
             if (_cells.Count <= 4) return;
 
             // Check for each-but-the-last cell
-            for (int i = 0; i < _cells.Count - 1; i++)
+            for (var i = 0; i < _cells.Count - 1; i++)
             {
                 if (_cells[i] == _cells.Last())
                 {
