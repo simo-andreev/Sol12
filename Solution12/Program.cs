@@ -20,7 +20,7 @@ namespace Solution12
                     .AddGenericPlugin(new ImGuiNetPlugin())
 //                .SetupFlags( /*targetTPS: 1*/ performBootstrap: true)
             );
-            Engine.SceneManager.SetScene(new SnekScene());
+            Engine.SceneManager.SetScene(new VeryScene());
             Engine.Run();
         }
     }
