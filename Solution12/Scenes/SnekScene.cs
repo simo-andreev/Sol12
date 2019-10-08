@@ -44,7 +44,7 @@ namespace Solution12.Scenes
         {
             for (byte i = 0; i < StartingCellCount; i++)
             {
-                _cells.Add(new Vector3(10, _cellSize.Y * i, 0));
+                _cells.Add(new Vector3(10, _cellSize.Y * (5+i), 0));
             }
         }
 
@@ -164,7 +164,7 @@ namespace Solution12.Scenes
             var boundX = Engine.Renderer.BaseTarget.Size.X;
             var boundY = Engine.Renderer.BaseTarget.Size.Y;
 
-            if (head.X <= 0 || head.Y <= 0 || head.X + _cellSize.X >= boundX || head.Y + _cellSize.Y >= boundY)
+            if (head.X < 0 || head.Y < 0 || head.X + _cellSize.X > boundX || head.Y + _cellSize.Y > boundY)
             {
                 _gameOver = true;
                 return;
