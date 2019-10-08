@@ -7,6 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="Adfectus" Version="0.0.21" />
+      <PackageReference Include="Adfectus.ImGuiNet" Version="1.0.6" />
       <PackageReference Include="Adfectus.Platform.DesktopGL" Version="0.0.5" />
     </ItemGroup>
 

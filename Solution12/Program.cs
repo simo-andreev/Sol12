@@ -1,6 +1,7 @@
 ﻿using System;
 using Adfectus.Common;
 using Adfectus.Common.Configuration;
+using Adfectus.ImGuiNet;
 using Adfectus.Implementation;
 using Jint;
 using Solution12.Scenes;
@@ -15,12 +16,12 @@ namespace Solution12
             Console.WriteLine("Hello World!");
 
             Engine.Setup<Adfectus.Platform.DesktopGL.DesktopPlatform>(new EngineBuilder()
-                .SetLogger<ConsoleLogger>()
-                .SetupAssets("Assets")
-                .SetupHost("Sol-12", WindowMode.Windowed, resizable: true)
-//                .SetupFlags(targetTPS: 1)
+                    .SetLogger<ConsoleLogger>()
+                    .SetupAssets("Assets")
+                    .SetupHost("Sol-12", WindowMode.Windowed, resizable: true)
+//                    .AddGenericPlugin(new ImGuiNetPlugin())
+//                .SetupFlags( /*targetTPS: 1*/ performBootstrap: true)
             );
-
             Engine.SceneManager.SetScene(new SnekScene());
             Engine.Run();
         }
