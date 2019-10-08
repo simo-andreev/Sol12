@@ -5,9 +5,11 @@ using System.Linq;
 using System.Numerics;
 using Adfectus.Common;
 using Adfectus.Graphics.Text;
+using Adfectus.ImGuiNet;
 using Adfectus.Input;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
+using ImGuiNET;
 
 namespace Solution12.Scenes
 {
@@ -22,8 +24,8 @@ namespace Solution12.Scenes
         private readonly Stopwatch _updateTimer = new Stopwatch();
         private readonly Random _random = new Random();
 
-        private readonly Vector3 _gameFieldPosition = new Vector3(0, 20, 0);
-        private readonly Vector2 _gameFieldSize = new Vector2(Engine.Renderer.BaseTarget.Size.X, Engine.Renderer.BaseTarget.Size.Y- 20);
+        private readonly Vector3 _gameFieldPosition = new Vector3(0, 30, 0);
+        private readonly Vector2 _gameFieldSize = new Vector2(Engine.Renderer.BaseTarget.Size.X, Engine.Renderer.BaseTarget.Size.Y - 30);
 
         // Snek bits and parts
         private readonly List<Vector3> _cells = new List<Vector3>();
@@ -134,15 +136,16 @@ namespace Solution12.Scenes
 
         private void UpdateDirection()
         {
-
             foreach (var keyCode in _validDirections)
             {
-                if (keyCode == _activeDirection || keyCode == _newDirection) return; // If the input is the same as the current direction -> no need to do anything
-                if (IsReverseOfActive(keyCode)) return; // U-turns in place are not allowed
+                if (keyCode == _activeDirection || keyCode == _newDirection) continue; // If the input is the same as the current direction -> no need to do anything
 
                 // TODO - Simo Andreev - 08.09.2019 - NOTE - this prioritises input based on listing order in [_validDirections] 
                 if (!Engine.InputManager.IsKeyDown(keyCode)) continue;
-                
+
+                if (IsReverseOfActive(keyCode)) continue; // U-turns in place are not allowed
+
+                // All conditions passed - assign key to be future _activeDirection (possibly)
                 _newDirection = keyCode;
                 return;
             }
@@ -166,7 +169,8 @@ namespace Solution12.Scenes
         {
             var head = _cells.Last();
 
-            if (head.X < _gameFieldPosition.X || head.Y < _gameFieldPosition.Y || head.X + _cellSize.X > _gameFieldPosition.X + _gameFieldSize.X || head.Y + _cellSize.Y > _gameFieldPosition.Y + _gameFieldSize.Y)
+            if (head.X < _gameFieldPosition.X || head.Y < _gameFieldPosition.Y || head.X + _cellSize.X > _gameFieldPosition.X + _gameFieldSize.X ||
+                head.Y + _cellSize.Y > _gameFieldPosition.Y + _gameFieldSize.Y)
             {
                 _gameOver = true;
                 return;
@@ -189,9 +193,11 @@ namespace Solution12.Scenes
 
         public override void Draw()
         {
+            RenderGui();
+
             Engine.Renderer.RenderOutline(_gameFieldPosition, _gameFieldSize, Color.White);
-            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"active: {_activeDirection} | new: {_newDirection}", new Vector3(_gameFieldSize.X-120, 0, 0), Color.Green);
-            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"Score: {_score}", Vector3.Zero, Color.Green);
+//            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"active: {_activeDirection} | new: {_newDirection}", new Vector3(_gameFieldSize.X-120, 0, 0), Color.Green);
+//            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"Score: {_score}", Vector3.Zero, Color.Green);
 
             Engine.Renderer.Render(_nibble, _cellSize, Color.FromNonPremultiplied(192, 82, 57, 255));
 
@@ -206,6 +212,21 @@ namespace Solution12.Scenes
                 _updateTimer.Stop();
                 Engine.Renderer.RenderString(_atlasUbuntuMonoBigg, "WASTED", new Vector3(200f), Color.Red);
             }
+        }
+
+        private void RenderGui()
+        {
+            ImGui.NewFrame();
+            ImGui.Begin("", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoMouseInputs);
+            ImGui.SetWindowPos(Vector2.Zero);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, Vector2.One);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(15, 6));
+            ImGui.SetWindowSize(new Vector2(Engine.Renderer.Camera.Width, 28));
+            ImGui.Columns(2);
+            ImGui.Text($"Score: {_score}");
+            ImGui.NextColumn();
+            ImGui.Text($"Input Info: active - {_activeDirection} | new - {_newDirection}");
+            Engine.Renderer.RenderGui();
         }
 
         public override void Unload()
