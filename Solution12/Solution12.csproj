@@ -25,4 +25,11 @@
       </EmbeddedResource>
     </ItemGroup>
 
+    <ItemGroup>
+        <None Remove="Assets\SicBeats\*" />
+        <EmbeddedResource Include="Assets\SicBeats\*.wav">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+    </ItemGroup>
+    
 </Project>

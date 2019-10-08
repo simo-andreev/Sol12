@@ -9,6 +9,7 @@ using Adfectus.ImGuiNet;
 using Adfectus.Input;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
+using Adfectus.Sound;
 using ImGuiNET;
 
 namespace Solution12.Scenes
@@ -18,6 +19,7 @@ namespace Solution12.Scenes
         // Loaded assets
         private Atlas _atlasUbuntuMonoSmall;
         private Atlas _atlasUbuntuMonoBigg;
+        private SoundFile[] _ripTunes;
 
         // Scene-status-related shit
         private bool _gameOver = false;
@@ -54,6 +56,14 @@ namespace Solution12.Scenes
         {
             _atlasUbuntuMonoSmall = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(8);
             _atlasUbuntuMonoBigg = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(64);
+
+            _ripTunes = new[]
+            {
+                Engine.AssetLoader.Get<SoundFile>("sicbeats/wasted_bell_0.wav"),
+                Engine.AssetLoader.Get<SoundFile>("sicbeats/wasted_bell_1.wav"),
+                Engine.AssetLoader.Get<SoundFile>("sicbeats/wasted_bell_2.wav"),
+            };
+            Engine.SoundManager.Volume = 100;
         }
 
         public override void Update()
@@ -173,6 +183,7 @@ namespace Solution12.Scenes
                 head.Y + _cellSize.Y > _gameFieldPosition.Y + _gameFieldSize.Y)
             {
                 _gameOver = true;
+                Engine.SoundManager.Play(_ripTunes[_random.Next(_ripTunes.Length)], "mainAudioLayer");
                 return;
             }
 
@@ -185,6 +196,7 @@ namespace Solution12.Scenes
                 if (_cells[i] == _cells.Last())
                 {
                     _gameOver = true;
+                    Engine.SoundManager.Play(_ripTunes[_random.Next(_ripTunes.Length)], "mainAudioLayer");
                     return;
                 }
             }
@@ -232,6 +244,9 @@ namespace Solution12.Scenes
         public override void Unload()
         {
             Engine.AssetLoader.Destroy("font/ubuntumono-r.ttf");
+            Engine.AssetLoader.Destroy("sicbeats/wasted_bell_0.wav");
+            Engine.AssetLoader.Destroy("sicbeats/wasted_bell_1.wav");
+            Engine.AssetLoader.Destroy("sicbeats/wasted_bell_2.wav");
         }
     }
 }
