@@ -26,13 +26,17 @@ namespace Solution12.Scenes
         private readonly Stopwatch _updateTimer = new Stopwatch();
         private readonly Random _random = new Random();
 
+        private readonly Vector3 _gameFieldPosition = new Vector3(0, 20, 0);
+        private readonly Vector2 _gameFieldSize = new Vector2(Engine.Renderer.BaseTarget.Size.X, Engine.Renderer.BaseTarget.Size.Y- 20);
+
         // Snek bits and parts
         private readonly List<Vector3> _cells = new List<Vector3>();
         private readonly Vector2 _cellSize = new Vector2(10f);
 
         // Game-y stuffs
         private const byte StartingCellCount = 5;
-        private Vector3 _nibble = new Vector3(Engine.Renderer.BaseTarget.Size.X / 2, Engine.Renderer.BaseTarget.Size.X / 2, 0);
+        private Vector3 _nibble = new Vector3(Engine.Renderer.BaseTarget.Size.X / 2, Engine.Renderer.BaseTarget.Size.Y / 2, 0);
+        private int _score;
 
         // Control/Input
         private KeyCode? _activeDirection = null;
@@ -44,7 +48,7 @@ namespace Solution12.Scenes
         {
             for (byte i = 0; i < StartingCellCount; i++)
             {
-                _cells.Add(new Vector3(10, _cellSize.Y * (5+i), 0));
+                _cells.Add(new Vector3(10, _cellSize.Y * (5 + i), 0));
             }
         }
 
@@ -111,6 +115,7 @@ namespace Solution12.Scenes
             if (_cells.Last() == _nibble)
             {
                 _cells.Insert(0, _cells[0]);
+                _score++;
                 RegenerateNibble();
             }
         }
@@ -120,12 +125,12 @@ namespace Solution12.Scenes
             // TODO - Simo Andreev - 08.10.2019 - coul produce a non-nommable niblle - e.g. if selected (maxBound - _cellSize.X) is not divisible by size for instance
 //            var x = _random.Next((int) (Engine.Renderer.BaseTarget.Size.X - _cellSize.X));
 //            var y = _random.Next((int) (Engine.Renderer.BaseTarget.Size.X - _cellSize.X));
-            
-            int xPositionCount = (int) Math.Floor(Engine.Renderer.BaseTarget.Size.X / _cellSize.X);
-            int yPositionCount = (int) Math.Floor(Engine.Renderer.BaseTarget.Size.Y / _cellSize.Y);
-            
-            var x = _random.Next(xPositionCount) * _cellSize.X;
-            var y = _random.Next(yPositionCount) * _cellSize.Y;
+
+            int xPositionCount = (int) Math.Floor(_gameFieldSize.X / _cellSize.X);
+            int yPositionCount = (int) Math.Floor(_gameFieldSize.Y / _cellSize.Y);
+
+            var x = _random.Next(xPositionCount) * _cellSize.X + _gameFieldPosition.X;
+            var y = _random.Next(yPositionCount) * _cellSize.Y + _gameFieldPosition.Y;
 
             _nibble = new Vector3(x, y, 0);
         }
@@ -161,10 +166,7 @@ namespace Solution12.Scenes
         {
             var head = _cells.Last();
 
-            var boundX = Engine.Renderer.BaseTarget.Size.X;
-            var boundY = Engine.Renderer.BaseTarget.Size.Y;
-
-            if (head.X < 0 || head.Y < 0 || head.X + _cellSize.X > boundX || head.Y + _cellSize.Y > boundY)
+            if (head.X < _gameFieldPosition.X || head.Y < _gameFieldPosition.Y || head.X + _cellSize.X > _gameFieldPosition.X + _gameFieldSize.X || head.Y + _cellSize.Y > _gameFieldPosition.Y + _gameFieldSize.Y)
             {
                 _gameOver = true;
                 return;
@@ -187,8 +189,9 @@ namespace Solution12.Scenes
 
         public override void Draw()
         {
-            Engine.Renderer.RenderOutline(Engine.Renderer.Camera.Position, Engine.Renderer.Camera.Size, Color.White);
-            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"active: {_activeDirection} | new: {_newDirection}", Vector3.Zero, Color.Green);
+            Engine.Renderer.RenderOutline(_gameFieldPosition, _gameFieldSize, Color.White);
+            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"active: {_activeDirection} | new: {_newDirection}", new Vector3(_gameFieldSize.X-120, 0, 0), Color.Green);
+            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"Score: {_score}", Vector3.Zero, Color.Green);
 
             Engine.Renderer.Render(_nibble, _cellSize, Color.FromNonPremultiplied(192, 82, 57, 255));
 
@@ -201,7 +204,7 @@ namespace Solution12.Scenes
             if (_gameOver)
             {
                 _updateTimer.Stop();
-                Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, "WASTED", new Vector3(20f), Color.Red);
+                Engine.Renderer.RenderString(_atlasUbuntuMonoBigg, "WASTED", new Vector3(200f), Color.Red);
             }
         }
 
