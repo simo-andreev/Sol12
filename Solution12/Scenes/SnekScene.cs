@@ -5,13 +5,9 @@ using System.Linq;
 using System.Numerics;
 using Adfectus.Common;
 using Adfectus.Graphics.Text;
-using Adfectus.ImGuiNet;
 using Adfectus.Input;
-using Adfectus.Logging;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
-using ImGuiNET;
-using SharpFont;
 
 namespace Solution12.Scenes
 {
@@ -137,17 +133,22 @@ namespace Solution12.Scenes
 
         private void UpdateDirection()
         {
-            foreach (var keyCode in Engine.InputManager.GetAllKeysDown())
-            {
-                if (keyCode == _activeDirection) return; // If the input is the same as the current direction -> no need to do anything
-                if (!_validDirections.Contains(keyCode)) return; // Ignore inputs outside of the predefined 'validDirection' keys
-                if (IsReverseOfCurrent(keyCode)) return; // U-turns in place are not allowed
 
-                _newDirection = keyCode;
+            foreach (var keyCode in _validDirections)
+            {
+                if (keyCode == _activeDirection || keyCode == _newDirection) return; // If the input is the same as the current direction -> no need to do anything
+                if (IsReverseOfActive(keyCode)) return; // U-turns in place are not allowed
+
+                // TODO - Simo Andreev - 08.09.2019 - NOTE - this prioritises input based on listing order in [_validDirections] 
+                if (Engine.InputManager.IsKeyDown(keyCode))
+                {
+                    _newDirection = keyCode;
+                    return;
+                }
             }
         }
 
-        private bool IsReverseOfCurrent(KeyCode keyCode)
+        private bool IsReverseOfActive(KeyCode keyCode)
         {
             if (_activeDirection == null || keyCode == _activeDirection) return false;
 
