@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -23,6 +24,7 @@ namespace Solution12.Scenes
         // Scene-status-related shit
         private bool _gameOver = false;
         private readonly Stopwatch _updateTimer = new Stopwatch();
+        private readonly Random _random = new Random();
 
         // Snek bits and parts
         private readonly List<Vector3> _cells = new List<Vector3>();
@@ -30,6 +32,7 @@ namespace Solution12.Scenes
 
         // Game-y stuffs
         private const byte StartingCellCount = 5;
+        private Vector3 _nibble = new Vector3(Engine.Renderer.BaseTarget.Size.X / 2, Engine.Renderer.BaseTarget.Size.X / 2, 0);
 
         // Control/Input
         private KeyCode? _activeDirection = null;
@@ -99,25 +102,32 @@ namespace Solution12.Scenes
                 }
             }
 
-            CheckForCollision();
+            CheckForHostileCollision();
+            CheckForNibbleCollision();
         }
 
-        public override void Draw()
+        private void CheckForNibbleCollision()
         {
-            Engine.Renderer.RenderOutline(Engine.Renderer.Camera.Position, Engine.Renderer.Camera.Size, Color.White);
-            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"active: {_activeDirection} | new: {_newDirection}", Vector3.Zero, Color.Green);
-
-            foreach (var cell in _cells)
+            if (_cells.Last() == _nibble)
             {
-                Engine.Renderer.Render(cell, _cellSize, Color.Green);
-                Engine.Renderer.RenderOutline(cell, _cellSize, Color.Black, 1f);
+                _cells.Insert(0, _cells[0]);
+                RegenerateNibble();
             }
+        }
 
-            if (_gameOver)
-            {
-                _updateTimer.Stop();
-                Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, "WASTED", new Vector3(20f), Color.Red);
-            }
+        private void RegenerateNibble()
+        {
+            // TODO - Simo Andreev - 08.10.2019 - coul produce a non-nommable niblle - e.g. if selected (maxBound - _cellSize.X) is not divisible by size for instance
+//            var x = _random.Next((int) (Engine.Renderer.BaseTarget.Size.X - _cellSize.X));
+//            var y = _random.Next((int) (Engine.Renderer.BaseTarget.Size.X - _cellSize.X));
+            
+            int xPositionCount = (int) Math.Floor(Engine.Renderer.BaseTarget.Size.X / _cellSize.X);
+            int yPositionCount = (int) Math.Floor(Engine.Renderer.BaseTarget.Size.Y / _cellSize.Y);
+            
+            var x = _random.Next(xPositionCount) * _cellSize.X;
+            var y = _random.Next(yPositionCount) * _cellSize.Y;
+
+            _nibble = new Vector3(x, y, 0);
         }
 
         private void UpdateDirection()
@@ -147,7 +157,7 @@ namespace Solution12.Scenes
             return false;
         }
 
-        private void CheckForCollision()
+        private void CheckForHostileCollision()
         {
             var head = _cells.Last();
 
@@ -171,6 +181,27 @@ namespace Solution12.Scenes
                     _gameOver = true;
                     return;
                 }
+            }
+        }
+
+
+        public override void Draw()
+        {
+            Engine.Renderer.RenderOutline(Engine.Renderer.Camera.Position, Engine.Renderer.Camera.Size, Color.White);
+            Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"active: {_activeDirection} | new: {_newDirection}", Vector3.Zero, Color.Green);
+
+            Engine.Renderer.Render(_nibble, _cellSize, Color.FromNonPremultiplied(192, 82, 57, 255));
+
+            foreach (var cell in _cells)
+            {
+                Engine.Renderer.Render(cell, _cellSize, Color.Green);
+                Engine.Renderer.RenderOutline(cell, _cellSize, Color.Black, 1f);
+            }
+
+            if (_gameOver)
+            {
+                _updateTimer.Stop();
+                Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, "WASTED", new Vector3(20f), Color.Red);
             }
         }
 
