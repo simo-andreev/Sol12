@@ -4,10 +4,13 @@ using System.Linq;
 using System.Numerics;
 using Adfectus.Common;
 using Adfectus.Graphics.Text;
+using Adfectus.ImGuiNet;
 using Adfectus.Input;
 using Adfectus.Logging;
 using Adfectus.Primitives;
 using Adfectus.Scenography;
+using ImGuiNET;
+using SharpFont;
 
 namespace Solution12.Scenes
 {
@@ -15,7 +18,7 @@ namespace Solution12.Scenes
     {
         // Loaded assets
         private Atlas _atlasUbuntuMonoSmall;
-        private Atlas _atlasUbuntuMonoBicc;
+        private Atlas _atlasUbuntuMonoBigg;
 
         // Scene-status-related shit
         private bool _gameOver = false;
@@ -32,6 +35,7 @@ namespace Solution12.Scenes
         private KeyCode? _activeDirection = null;
         private KeyCode? _newDirection = null;
         private readonly KeyCode[] _validDirections = {KeyCode.A, KeyCode.D, KeyCode.W, KeyCode.S};
+        private const short StepPeriodMs = 100;
 
         public SnekScene()
         {
@@ -44,34 +48,75 @@ namespace Solution12.Scenes
         public override void Load()
         {
             _atlasUbuntuMonoSmall = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(8);
-            _atlasUbuntuMonoBicc = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(64);
-            _updateTimer.Start();
+            _atlasUbuntuMonoBigg = Engine.AssetLoader.Get<Font>("font/ubuntumono-r.ttf").GetFontAtlas(64);
         }
 
         public override void Update()
         {
-            UpdateDirection();
+            if (_gameOver) return;
 
-            if (_updateTimer.ElapsedMilliseconds >= 250)
+            UpdateDirection();
+            if (_newDirection != null) _updateTimer.Start();
+
+            if (_updateTimer.ElapsedMilliseconds >= StepPeriodMs)
             {
                 _updateTimer.Restart();
                 DoStep();
             }
         }
 
+        private void DoStep()
+        {
+            _activeDirection = _newDirection;
+
+            for (int i = 0; i < _cells.Count; i++)
+            {
+                if (i < _cells.Count - 1) // if not last cell
+                {
+                    // move to position of next cell
+                    _cells[i] = _cells[i + 1];
+                }
+                else // is last cell -> move to new position
+                {
+                    var cell = _cells[i];
+                    switch (_activeDirection)
+                    {
+                        case KeyCode.A:
+                            cell.X -= _cellSize.X;
+                            break;
+                        case KeyCode.D:
+                            cell.X += _cellSize.X;
+                            break;
+                        case KeyCode.W:
+                            cell.Y -= _cellSize.Y;
+                            break;
+                        case KeyCode.S:
+                            cell.Y += _cellSize.Y;
+                            break;
+                    }
+
+                    _cells[i] = cell;
+                }
+            }
+
+            CheckForCollision();
+        }
+
         public override void Draw()
         {
             Engine.Renderer.RenderOutline(Engine.Renderer.Camera.Position, Engine.Renderer.Camera.Size, Color.White);
             Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, $"active: {_activeDirection} | new: {_newDirection}", Vector3.Zero, Color.Green);
-            
+
             foreach (var cell in _cells)
             {
                 Engine.Renderer.Render(cell, _cellSize, Color.Green);
+                Engine.Renderer.RenderOutline(cell, _cellSize, Color.Black, 1f);
             }
 
             if (_gameOver)
             {
-                Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, "WASTED", Vector3.One, Color.Red);
+                _updateTimer.Stop();
+                Engine.Renderer.RenderString(_atlasUbuntuMonoSmall, "WASTED", new Vector3(20f), Color.Red);
             }
         }
 
@@ -102,38 +147,29 @@ namespace Solution12.Scenes
             return false;
         }
 
-        private void DoStep()
+        private void CheckForCollision()
         {
-            _activeDirection = _newDirection;
-//            Engine.Log.Info($, MessageSource.Input);
-            
-            for (int i = 0; i < _cells.Count; i++)
-            {
-                if (i < _cells.Count - 1) // if not last cell
-                {
-                    // move to position of next cell
-                    _cells[i] = _cells[i + 1];
-                }
-                else // is last cell -> move to new position
-                {
-                    var cell = _cells[i];
-                    switch (_activeDirection)
-                    {
-                        case KeyCode.A:
-                            cell.X -= _cellSize.X;
-                            break;
-                        case KeyCode.D:
-                            cell.X += _cellSize.X;
-                            break;
-                        case KeyCode.W:
-                            cell.Y -= _cellSize.Y;
-                            break;
-                        case KeyCode.S:
-                            cell.Y += _cellSize.Y;
-                            break;
-                    }
+            var head = _cells.Last();
 
-                    _cells[i] = cell;
+            var boundX = Engine.Renderer.BaseTarget.Size.X;
+            var boundY = Engine.Renderer.BaseTarget.Size.Y;
+
+            if (head.X <= 0 || head.Y <= 0 || head.X + _cellSize.X >= boundX || head.Y + _cellSize.Y >= boundY)
+            {
+                _gameOver = true;
+                return;
+            }
+
+            // Can't bite yer arse if you're less than 5 blocks/cells long. (Would require turns of over 90° to do so and in _our_ world those don't exist')                     //also -conveniently- allows me to start with 1-to-4 'stacked' cells
+            if (_cells.Count <= 4) return;
+
+            // Check for each-but-the-last cell
+            for (int i = 0; i < _cells.Count - 1; i++)
+            {
+                if (_cells[i] == _cells.Last())
+                {
+                    _gameOver = true;
+                    return;
                 }
             }
         }
