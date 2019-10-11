@@ -4,14 +4,15 @@ using System.Numerics;
 using Emotion.Common;
 using Emotion.Graphics;
 using Emotion.Graphics.Command;
-using Emotion.Graphics.Data;
-using Emotion.Graphics.Objects;
 using Emotion.IO;
+using Emotion.Plugins.ImGuiNet;
 using Emotion.Primitives;
+using Emotion.Scenography;
+using ImGuiNET;
 
 namespace Solution12.Scenes
 {
-    public class TexturaMagna : UnScene
+    public class TexturaMagna : IScene
     {
         private Random _random = new Random();
 
@@ -27,7 +28,9 @@ namespace Solution12.Scenes
 
         private Vector3[,] _map;
 
-        protected override void Load()
+        private Vector3 _camRotationInputPosition = new Vector3();
+
+        public void Load()
         {
             _ubuntuFontAsset = Engine.AssetLoader.Get<FontAsset>("font/UbuntuMono-R.ttf").GetAtlas(12);
             _tileTexture = Engine.AssetLoader.Get<TextureAsset>("iMage/tile_outlined.png");
@@ -37,17 +40,28 @@ namespace Solution12.Scenes
 
             _map = new Vector3[5, 5];
             for (int x = 0, y = 0, i = 0; i < _map.Length; i++, x = i / MapX, y = i % MapY)
-                _map[x, y] = new Vector3(x * TileWidth, y * TileWidth, x%2 * 10);
+                _map[x, y] = new Vector3(x * TileWidth, y * TileWidth, x % 2 * 10);
         }
 
-        protected override void Update()
+        public void Update()
         {
+            /* do noting */
         }
 
-        protected override void Draw(RenderComposer composer)
+        public void Draw(RenderComposer composer)
         {
             foreach (var position in _map)
                 composer.RenderSprite(position, TileSize, Color.White, _tileTexture.Texture);
+
+            ImGui.NewFrame();
+            ImGui.DragFloat3("Cam Rot:", ref SolCam.Rotation);
+
+            composer.RenderUI();
+        }
+
+        public void Unload()
+        {
+            /* do noting */
         }
     }
 }
