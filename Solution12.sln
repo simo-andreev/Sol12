@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solution12", "Solution12\Solution12.csproj", "{C315F1FA-D0E3-40ED-B3FA-DB7C0D34C113}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emotion", "..\Emotion\Emotion\Emotion.csproj", "{6F7B8178-61AB-41D1-983F-9BB022839FD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emotion.Plugins.ImGuiNet", "..\Emotion\Emotion.Plugins.ImGuiNet\Emotion.Plugins.ImGuiNet.csproj", "{F64C8B23-7303-494B-9882-C3DF3A5CC369}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{C315F1FA-D0E3-40ED-B3FA-DB7C0D34C113}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C315F1FA-D0E3-40ED-B3FA-DB7C0D34C113}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C315F1FA-D0E3-40ED-B3FA-DB7C0D34C113}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F7B8178-61AB-41D1-983F-9BB022839FD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F7B8178-61AB-41D1-983F-9BB022839FD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F7B8178-61AB-41D1-983F-9BB022839FD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F7B8178-61AB-41D1-983F-9BB022839FD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F64C8B23-7303-494B-9882-C3DF3A5CC369}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F64C8B23-7303-494B-9882-C3DF3A5CC369}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F64C8B23-7303-494B-9882-C3DF3A5CC369}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F64C8B23-7303-494B-9882-C3DF3A5CC369}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

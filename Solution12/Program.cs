@@ -1,9 +1,14 @@
 ﻿using System;
-using Adfectus.Common;
-using Adfectus.Common.Configuration;
-using Adfectus.ImGuiNet;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using Emotion.Common;
+using Emotion.Graphics.Camera;
+using Emotion.Graphics.Command;
+using Emotion.Graphics.Objects;
+using Emotion.IO;
+using Emotion.Plugins.ImGuiNet;
+using Emotion.Primitives;
 using Solution12.Scenes;
-using Engine = Adfectus.Common.Engine;
 
 namespace Solution12
 {
@@ -13,15 +18,35 @@ namespace Solution12
         {
             Console.WriteLine("Hello World!");
 
-            Engine.Setup<Adfectus.Platform.DesktopGL.DesktopPlatform>(new EngineBuilder()
-                    .SetLogger<ConsoleLogger>()
-                    .SetupAssets("Assets")
-                    .SetupHost("Sol-12", WindowMode.Windowed, resizable: true)
-                    .AddGenericPlugin(new ImGuiNetPlugin())
-//                .SetupFlags( /*targetTPS: 1*/ performBootstrap: true)
+
+            Engine.Setup(new Configurator()
+                .AddPlugin(new ImGuiNetPlugin())
             );
-            Engine.SceneManager.SetScene(new SceneScene());
+
+            Engine.AssetLoader.AddSource(new FileAssetSource("assets/iMage"));
+            Engine.AssetLoader.AddSource(new FileAssetSource("assets/Font"));
+            Engine.AssetLoader.AddSource(new FileAssetSource("assets/SicBeats"));
+            
+            Engine.Renderer.Camera = new SolCam(new Vector3(0, 0, 200));
+
+            new TexturaMagna().Attach();
+
             Engine.Run();
         }
+    }
+}
+
+class SolCam : CameraBase
+{
+    public SolCam(Vector3 position, float zoom = 1) : base(position, zoom)
+    {
+    }
+    
+    
+
+    public override void RecreateMatrix()
+    {
+        base.RecreateMatrix();
+        ViewMatrix = Matrix4x4.CreateRotationX(4) * ViewMatrixUnscaled;
     }
 }

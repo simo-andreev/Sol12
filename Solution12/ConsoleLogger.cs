@@ -1,12 +1,11 @@
 ﻿using System;
-using Adfectus.Logging;
+using Emotion.Standard.Logging;
 
 namespace Solution12
 {
-    // ReSharper disable once ClassNeverInstantiated.Global - Instantiated by [EngineBuilder]
     public class ConsoleLogger : LoggingProvider
     {
-        public override void Log(MessageType type, MessageSource source, string message)
+        public override void Log(MessageType type, string source, string message)
         {
             Console.WriteLine($"[{source}]: {type} - {message}");
         }
