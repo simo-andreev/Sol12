@@ -7,6 +7,7 @@ using Emotion.Graphics.Camera;
 using Emotion.Graphics.Command;
 using Emotion.Graphics.Objects;
 using Emotion.IO;
+using Emotion.Platform.Input;
 using Emotion.Plugins.ImGuiNet;
 using Emotion.Primitives;
 using Emotion.Utility;
@@ -19,22 +20,23 @@ namespace Solution12
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            
+
             Engine.Setup(new Configurator()
                 .AddPlugin(new ImGuiNetPlugin())
                 .SetDebug(true)
+                .SetHostSettings(new Vector2(1270, 720))
             );
 
             Engine.AssetLoader.AddSource(new FileAssetSource("assets/iMage"));
             Engine.AssetLoader.AddSource(new FileAssetSource("assets/Font"));
             Engine.AssetLoader.AddSource(new FileAssetSource("assets/SicBeats"));
 
-            Engine.Renderer.FarZ = 600000;
-            Engine.Renderer.NearZ = -600000;
+            Engine.Renderer.FarZ = 600000; // TODO - Simo Andreev - 12.10.2019 - temp sht
+            Engine.Renderer.NearZ = -600000; // TODO - Simo Andreev - 12.10.2019 - temp sht
             Engine.Renderer.Camera = new SolCam(new Vector3(0, 0, 0));
 
             Engine.SceneManager.SetScene(new TexturaMagna());
-            
+
             Engine.Run();
         }
     }
@@ -42,8 +44,6 @@ namespace Solution12
 
 class SolCam : CameraBase
 {
-    public static Vector3 Rotation;
-
     public SolCam(Vector3 position, float zoom = 1) : base(position, zoom)
     {
     }
@@ -51,12 +51,14 @@ class SolCam : CameraBase
     public override void Update()
     {
         base.Update();
-        RecreateMatrix();
-    }
+        
+        Vector2 dir = Vector2.Zero;
+        if (Engine.InputManager.IsKeyHeld(Key.W)) dir.Y -= 1;
+        if (Engine.InputManager.IsKeyHeld(Key.A)) dir.X -= 1;
+        if (Engine.InputManager.IsKeyHeld(Key.S)) dir.Y += 1;
+        if (Engine.InputManager.IsKeyHeld(Key.D)) dir.X += 1;
 
-    public override void RecreateMatrix()
-    {
-        base.RecreateMatrix();
-        ViewMatrix = Matrix4x4.CreateFromYawPitchRoll(MathExtension.DegreesToRadians(Rotation.X), MathExtension.DegreesToRadians(Rotation.Y), MathExtension.DegreesToRadians(Rotation.Z)) * ViewMatrix;
+        dir *= new Vector2(0.35f * Engine.DeltaTime, 0.35f * Engine.DeltaTime);
+        Engine.Renderer.Camera.Position += new Vector3(dir, 0);
     }
 }
