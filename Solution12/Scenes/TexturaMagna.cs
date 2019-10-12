@@ -1,108 +1,92 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
 using Emotion.Common;
 using Emotion.Graphics;
 using Emotion.Graphics.Command;
-using Emotion.Graphics.Data;
 using Emotion.IO;
-using Emotion.Plugins.ImGuiNet;
-using Emotion.Primitives;
 using Emotion.Scenography;
 using Emotion.Utility;
-using ImGuiNET;
+using Solution12.Scenes.Graphics.Command;
 
 namespace Solution12.Scenes
 {
     public class TexturaMagna : IScene
     {
-        private Random _random = new Random();
+        private const string ResourceNameFontUbuntu = "font/UbuntuMono-R.ttf";
+        private const string ResourceNameTextureTileOutlinedUbuntu = "iMage/tile_outlined.png"; // Don't like long field names? Don't care.
 
-        private const int MapX = 100;
-        private const int MapY = 100;
-        private const float TileWidth = 32;
-        private static readonly Vector2 TileSize = new Vector2(TileWidth);
+        private readonly Random _random = new Random();
 
         private DrawableFontAtlas _ubuntuFontAsset;
         private TextureAsset _tileTexture;
 
-        private List<RecyclableCommand> _renderCommands;
+        private const int MapTileCountX = 100; // number of desired tiles on the "width" aka the pre-rotation 'X' axis.
+        private const int MapTileCountY = 100; // number of desired tiles on the "height" aka the pre-rotation 'Y' axis.
+        private static readonly Vector2 TileSize = new Vector2(32f); // the individual tile size Vect
 
-        private Vector3[,] _map;
+        // Init the height map.
+        // the size of the 2d Array is tileCount+1, because tiles are drawn in between vertices/vector3s. e.g. 0-1; 1-2; 2-3 would be 3 tiles, but needs 4 vertices
+        private readonly Vector3[,] _heightMap = new Vector3[MapTileCountX + 1, MapTileCountY + 1];
 
-        private Vector3 _camRotationInputPosition = new Vector3();
-        private readonly QuadBatch _batch = new QuadBatch();
-        private Vector2 _mouseWorldPos;
-        private Vector3 _mouseMapPos;
-        private Matrix4x4 _rotate = Matrix4x4.Identity;
-        private Vector3 _rotation = new Vector3(0, 45, 45);
+        // Batch which holds all RenderSpriteCommand-s to allow batch processing/publishing
+        private readonly QuadBatch _mapSpriteRenderBatch = new QuadBatch();
+
+        // The height map (and from there, effectively the tile sprites) are rotated to get an isometric-ish perspective
+        private readonly Matrix4x4 _tileRotation = Matrix4x4.CreateFromYawPitchRoll(MathExtension.DegreesToRadians(0), MathExtension.DegreesToRadians(45), MathExtension.DegreesToRadians(45));
+
+        // Current location of the mouse pointer in ScreenSpace
         private Vector2 _mouseScreenPos;
 
         public void Load()
         {
-            _ubuntuFontAsset = Engine.AssetLoader.Get<FontAsset>("font/UbuntuMono-R.ttf").GetAtlas(12);
-            _tileTexture = Engine.AssetLoader.Get<TextureAsset>("iMage/tile_outlined.png");
+            // Load assets
+            _ubuntuFontAsset = Engine.AssetLoader.Get<FontAsset>(ResourceNameFontUbuntu).GetAtlas(12);
+            _tileTexture = Engine.AssetLoader.Get<TextureAsset>(ResourceNameTextureTileOutlinedUbuntu);
 
-            _map = new Vector3[MapX, MapY];
-            for (int x = 0, y = 0, i = 0; i < _map.Length; i++, x = i / MapX, y = i % MapY)
+            // Do an unnecessarily confusing loop, 'cause Rider didn't auto-format sth the way _I_ like. Yup.                                                                                           Any complaints can be sent via passive-aggressive pull requests on github. Tnx.
+            for (int x = 0, y = 0, i = 0; i < _heightMap.Length; i++, x = i / _heightMap.GetLength(0), y = i % _heightMap.GetLength(1))
             {
-                var vector = new Vector3(x * TileWidth, y * TileWidth, _random.Next(20));
-                vector = Vector3.Transform(vector, Matrix4x4.CreateFromYawPitchRoll(MathExtension.DegreesToRadians(0), MathExtension.DegreesToRadians(45), MathExtension.DegreesToRadians(45)));
-                _map[x, y] = vector;
-            }
+                // Generate a position vector, offset appropriately as to current position in height map.
+                var vector = new Vector3(x * TileSize.X, y * TileSize.Y, _random.Next(20));
 
+                // Rotate the position using the isometric rotation
+                vector = Vector3.Transform(vector, _tileRotation);
 
-            for (var x = 0; x < _map.GetLength(0) - 1; x++)
-            {
-                for (var y = 0; y < _map.GetLength(1) - 1; y++)
-                {
-                    var tileRenderCommand = new RenderSpriteCommand
-                    {
-                        Position = _map[x, y],
-                        Color = Color.White.ToUint(),
-                        Size = TileSize,
-                        Texture = _tileTexture.Texture
-                    };
+                // Assign in height map @ appropriate position, storing for later use
+                _heightMap[x, y] = vector;
 
-                    tileRenderCommand.Process();
-                    var vert1 = tileRenderCommand.Vertices[1].Vertex;
-                    tileRenderCommand.Vertices[1].Vertex = _map[x + 1, y];
-                    tileRenderCommand.Vertices[2].Vertex = _map[x + 1, y + 1];
-                    tileRenderCommand.Vertices[3].Vertex = _map[x, y + 1];
+                // Skip first column and first row, as 'neighbours' necessary for generating a quadrilateral, instead create TileRenderCommand, once last vertex of each quad is generated
+                if (x == 0 || y == 0) continue;
 
-                    _batch.PushSprite(tileRenderCommand);
-                }
+                // Generate a Sprite RenderCommand for the current position vector, settings its bounds to the current and 3 'previous' vertexes
+                var tileRenderCommand = new RenderTileCommand(
+                    _heightMap[x - 1, y - 1],
+                    _heightMap[x, y - 1],
+                    _heightMap[x, y],
+                    _heightMap[x - 1, y],
+                    _tileTexture.Texture
+                );
+
+                // #Push dat Render boi into the batch
+                _mapSpriteRenderBatch.PushSprite(tileRenderCommand);
             }
         }
 
         public void Update()
         {
-            _rotate = Matrix4x4.CreateFromYawPitchRoll(MathExtension.DegreesToRadians(_rotation.X), MathExtension.DegreesToRadians(_rotation.Y), MathExtension.DegreesToRadians(_rotation.Z));
-
             _mouseScreenPos = Engine.Host.MousePosition;
-            _mouseWorldPos = Engine.Renderer.Camera.ScreenToWorld(_mouseScreenPos);
-
-            _mouseMapPos = WorldToMapScape(new Vector3(_mouseWorldPos, 2));
         }
 
         public void Draw(RenderComposer composer)
         {
-            composer.PushCommand(_batch, dontBatch: true);
+            // Draw dem map tiles. Draw 'em good.
+            composer.PushCommand(_mapSpriteRenderBatch, dontBatch: true);
         }
 
         public void Unload()
         {
-            /* do noting */
-        }
-
-        public Vector3 PositionOfTile(Vector2 tileId)
-        {
-            return Vector3.Zero;
-        }
-
-        public Vector3 WorldToMapScape(Vector3 worldPos)
-        {
-            return Vector3.Transform(worldPos, _rotate);
+            Engine.AssetLoader.Destroy(ResourceNameFontUbuntu);
+            Engine.AssetLoader.Destroy(ResourceNameTextureTileOutlinedUbuntu);
         }
     }
 }
