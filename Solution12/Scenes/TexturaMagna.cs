@@ -4,32 +4,38 @@ using Emotion.Common;
 using Emotion.Graphics;
 using Emotion.Graphics.Command;
 using Emotion.IO;
+using Emotion.Plugins.ImGuiNet;
+using Emotion.Primitives;
 using Emotion.Scenography;
 using Emotion.Utility;
+using ImGuiNET;
 using Solution12.Scenes.Graphics.Command;
 
 namespace Solution12.Scenes
 {
     public class TexturaMagna : IScene
     {
-        private const string ResourceNameFontUbuntu = "font/UbuntuMono-R.ttf";
-        private const string ResourceNameTextureTileOutlinedUbuntu = "iMage/tile_outlined.png"; // Don't like long field names? Don't care.
+        private const string RESOURCE_NAME_FONT_UBUNTU = "font/UbuntuMono-R.ttf";
+        private const string RESOURCE_NAME_TEXTURE_TILE_OUTLINED = "iMage/tile_outlined.png"; // Don't like long field names? Don't care.
+        private const string RESOURCE_NAME_TEXTURE_TILE = "iMage/tile.png"; // Don't like long field names? Don't care.
+        private const string RESOURCE_NAME_SHADER = "Shaders/MeshShader.xml";
 
         private readonly Random _random = new Random();
 
         private DrawableFontAtlas _ubuntuFontAsset;
         private TextureAsset _tileTexture;
+        private ShaderAsset _shader;
 
-        private const int MapTileCountX = 100; // number of desired tiles on the "width" aka the pre-rotation 'X' axis.
-        private const int MapTileCountY = 100; // number of desired tiles on the "height" aka the pre-rotation 'Y' axis.
+        private const int MAP_TILE_COUNT_X = 100; // number of desired tiles on the "width" aka the pre-rotation 'X' axis.
+        private const int MAP_TILE_COUNT_Y = 100; // number of desired tiles on the "height" aka the pre-rotation 'Y' axis.
         private static readonly Vector2 TileSize = new Vector2(32f); // the individual tile size Vect
 
         // Init the height map.
         // the size of the 2d Array is tileCount+1, because tiles are drawn in between vertices/vector3s. e.g. 0-1; 1-2; 2-3 would be 3 tiles, but needs 4 vertices
-        private readonly Vector3[,] _heightMap = new Vector3[MapTileCountX + 1, MapTileCountY + 1];
+        private readonly Vector3[,] _heightMap = new Vector3[MAP_TILE_COUNT_X + 1, MAP_TILE_COUNT_Y + 1];
 
         // Batch which holds all RenderSpriteCommand-s to allow batch processing/publishing
-        private readonly QuadBatch _mapSpriteRenderBatch = new QuadBatch();
+        private readonly MeshBatchCommand _mapSpriteRenderBatch = new MeshBatchCommand();
 
         // The height map (and from there, effectively the tile sprites) are rotated to get an isometric-ish perspective
         private readonly Matrix4x4 _tileRotation = Matrix4x4.CreateFromYawPitchRoll(MathExtension.DegreesToRadians(0), MathExtension.DegreesToRadians(45), MathExtension.DegreesToRadians(45));
@@ -39,9 +45,12 @@ namespace Solution12.Scenes
 
         public void Load()
         {
+            _mapSpriteRenderBatch.Sun = new Vector3(500, 500, 4000);
+
             // Load assets
-            _ubuntuFontAsset = Engine.AssetLoader.Get<FontAsset>(ResourceNameFontUbuntu).GetAtlas(12);
-            _tileTexture = Engine.AssetLoader.Get<TextureAsset>(ResourceNameTextureTileOutlinedUbuntu);
+            _ubuntuFontAsset = Engine.AssetLoader.Get<FontAsset>(RESOURCE_NAME_FONT_UBUNTU).GetAtlas(12);
+            _tileTexture = Engine.AssetLoader.Get<TextureAsset>(RESOURCE_NAME_TEXTURE_TILE);
+            _shader = Engine.AssetLoader.Get<ShaderAsset>(RESOURCE_NAME_SHADER);
 
             // Do an unnecessarily confusing loop, 'cause Rider didn't auto-format sth the way _I_ like. Yup.                                                                                           Any complaints can be sent via passive-aggressive pull requests on github. Tnx.
             for (int x = 0, y = 0, i = 0; i < _heightMap.Length; i++, x = i / _heightMap.GetLength(0), y = i % _heightMap.GetLength(1))
@@ -79,14 +88,31 @@ namespace Solution12.Scenes
 
         public void Draw(RenderComposer composer)
         {
+            composer.SetShader(_shader.Shader, () => { _shader.Shader.SetUniformVector3("Sun", _mapSpriteRenderBatch.Sun); });
+
             // Draw dem map tiles. Draw 'em good.
-            composer.PushCommand(_mapSpriteRenderBatch, dontBatch: true);
+            composer.PushCommand(_mapSpriteRenderBatch);
+
+            composer.RenderSprite(_mapSpriteRenderBatch.Sun, new Vector2(20, 20), Color.Red);
+
+            RenderGui(composer);
+        }
+
+        private void RenderGui(RenderComposer composer)
+        {
+            ImGui.NewFrame();
+            ImGui.Begin("TexturaMagna!", ImGuiWindowFlags.AlwaysAutoResize);
+            ImGui.InputFloat3("Sun", ref _mapSpriteRenderBatch.Sun);
+            ImGui.Text("Scroll to zoom, hold control (left) to fast!");
+            ImGui.End();
+            composer.RenderUI();
         }
 
         public void Unload()
         {
-            Engine.AssetLoader.Destroy(ResourceNameFontUbuntu);
-            Engine.AssetLoader.Destroy(ResourceNameTextureTileOutlinedUbuntu);
+            Engine.AssetLoader.Destroy(RESOURCE_NAME_FONT_UBUNTU);
+            Engine.AssetLoader.Destroy(RESOURCE_NAME_TEXTURE_TILE);
+            Engine.AssetLoader.Destroy(RESOURCE_NAME_TEXTURE_TILE_OUTLINED);
         }
     }
 }
