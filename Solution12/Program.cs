@@ -51,14 +51,32 @@ class SolCam : CameraBase
     public override void Update()
     {
         base.Update();
-        
-        Vector2 dir = Vector2.Zero;
-        if (Engine.InputManager.IsKeyHeld(Key.W)) dir.Y -= 1;
-        if (Engine.InputManager.IsKeyHeld(Key.A)) dir.X -= 1;
-        if (Engine.InputManager.IsKeyHeld(Key.S)) dir.Y += 1;
-        if (Engine.InputManager.IsKeyHeld(Key.D)) dir.X += 1;
 
-        dir *= new Vector2(0.35f * Engine.DeltaTime, 0.35f * Engine.DeltaTime);
-        Engine.Renderer.Camera.Position += new Vector3(dir, 0);
+        Vector3 cameraMoveDirection = Vector3.Zero;
+
+        // note any-and-all 'WASD' move input
+        if (Engine.InputManager.IsKeyHeld(Key.W)) cameraMoveDirection.Y -= 1;
+        if (Engine.InputManager.IsKeyHeld(Key.A)) cameraMoveDirection.X -= 1;
+        if (Engine.InputManager.IsKeyHeld(Key.S)) cameraMoveDirection.Y += 1;
+        if (Engine.InputManager.IsKeyHeld(Key.D)) cameraMoveDirection.X += 1;
+
+        // If mouse scroll-ed, note Zoom amount and direction
+        if (Engine.InputManager.GetMouseScrollRelative() == -1) Zoom += 0.035f * Engine.DeltaTime;
+        if (Engine.InputManager.GetMouseScrollRelative() == 1) Zoom -= 0.035f * Engine.DeltaTime;
+
+        // Clamp Camera Zoom
+        if (Zoom > 6) Zoom = 6;
+        if (Zoom < 0.5) Zoom = 0.5f;
+
+        var speed = 0.35f;
+        // If fast-move key down -> quadruple speed coefficient 
+        if (Engine.InputManager.IsKeyHeld(Key.LeftControl)) speed *= 4;
+
+        // Vect-multiply the recorded camera movement input by DeltaT'd speed coefficient in all axes.
+        cameraMoveDirection *= new Vector3(speed * Engine.DeltaTime, speed * Engine.DeltaTime, speed * Engine.DeltaTime);
+
+        // Finally apply the movement Vector to the camera and RecreateMatrix
+        Engine.Renderer.Camera.Position += cameraMoveDirection;
+        RecreateMatrix();
     }
 }
