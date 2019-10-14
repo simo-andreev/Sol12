@@ -30,4 +30,16 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\Shaders\Mesh.frag" />
+      <None Remove="Assets\Shaders\Mesh.vert" />
+      <None Remove="Assets\Shaders\MeshShader.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Assets\Shaders\Mesh.frag" />
+      <EmbeddedResource Include="Assets\Shaders\MeshShader.xml" />
+      <EmbeddedResource Include="Assets\Shaders\Mesh.vert" />
+    </ItemGroup>
 </Project>
