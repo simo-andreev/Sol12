@@ -14,11 +14,11 @@ namespace Solution12.Scenes
     {
         private Vector2 _mouseWorldPosition;
 
-        private Vector2 _barrierPosition = Vector2.Zero;
-        private Vector2 _barrierSize = new Vector2(10f);
+        private Vector2 _barrierStart = new Vector2(0, -50);
+        private Vector2 _barrierEnd = new Vector2(100, -50);
 
-        private Vector2 _rayStart = Vector2.Zero;
-        private Vector2 _rayEnd = new Vector2(200, 0);
+        private Vector2 _rayStart = new Vector2(50, 0);
+        private Vector2 _rayEnd = new Vector2(50, -64);
 
         public void Load()
         {
@@ -35,15 +35,15 @@ namespace Solution12.Scenes
             composer.RenderLine(new Vector2(0, -800), new Vector2(0, 800), Color.White, 0.5f);
 
 
-            var rectangle = new Rectangle(_barrierPosition, _barrierSize);
+            var rectangle = new Rectangle(_barrierStart, _barrierEnd);
             var ray = new Ray2D(_rayStart, _rayEnd);
 
 //            var color = rectangle.RayIntersects(ref rectangle, ref ray, out _) ? Color.Red : Color.CornflowerBlue;
 //            composer.RenderSprite(new Vector3(_barrierPosition, 0f), _barrierSize, color);
 
             var crossPoint = new Vector2();
-            var color = LineIntersectsLine(new Line(_rayStart, _rayEnd), new Line(_barrierPosition, _barrierSize), out crossPoint) ? Color.Red : Color.CornflowerBlue;
-            composer.RenderLine(_barrierPosition, _barrierSize, color);
+            var color = LineIntersectsLine(new Line(_rayStart, _rayEnd), new Line(_barrierStart, _barrierEnd), out crossPoint) ? Color.Red : Color.CornflowerBlue;
+            composer.RenderLine(_barrierStart, _barrierEnd, color);
             composer.RenderSprite(new Vector3(crossPoint.X - 1, crossPoint.Y - 1, 5), new Vector2(2f), Color.Magenta);
 
             composer.RenderLine(_rayStart, _rayEnd, Color.Green);
@@ -52,12 +52,14 @@ namespace Solution12.Scenes
             ImGui.NewFrame();
 
             ImGui.Text("         X        |        Y         ");
-            ImGui.DragFloat2("Barrier Position", ref _barrierPosition);
-            ImGui.DragFloat2("Barrier Size", ref _barrierSize);
+            ImGui.DragFloat2("Barrier Start", ref _barrierStart);
+            ImGui.DragFloat2("Barrier End", ref _barrierEnd);
             ImGui.Separator();
             ImGui.DragFloat2("Ray Start", ref _rayStart);
             ImGui.DragFloat2("Ray End", ref _rayEnd);
             ImGui.Text("         X        |        Y         ");
+            ImGui.Text($"CrossPoint = {crossPoint.ToString()}");
+            ImGui.Text($"Distance = {(_rayStart - crossPoint).Length()}");
 
             composer.RenderUI();
         }
