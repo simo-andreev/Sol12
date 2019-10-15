@@ -52,11 +52,11 @@ namespace Solution12.Scenes
             _tileTexture = Engine.AssetLoader.Get<TextureAsset>(RESOURCE_NAME_TEXTURE_TILE);
             _shader = Engine.AssetLoader.Get<ShaderAsset>(RESOURCE_NAME_SHADER);
 
-            // Do an unnecessarily confusing loop, 'cause Rider didn't auto-format sth the way _I_ like. Yup.                                                                                           Any complaints can be sent via passive-aggressive pull requests on github. Tnx.
-            for (int x = 0, y = 0, i = 0; i < _heightMap.Length; i++, x = i / _heightMap.GetLength(0), y = i % _heightMap.GetLength(1))
+            for (var x = 0; x < _heightMap.GetLength(0); x++)
+            for (var y = 0; y < _heightMap.GetLength(1); y++)
             {
                 // Generate a position vector, offset appropriately as to current position in height map.
-                var vector = new Vector3(x * TileSize.X, y * TileSize.Y, _random.Next(20));
+                var vector = new Vector3(x * TileSize.X, y * TileSize.Y, _random.Next((int) (TileSize.Y / 2)));
 
                 // Rotate the position using the isometric rotation
                 vector = Vector3.Transform(vector, _tileRotation);
