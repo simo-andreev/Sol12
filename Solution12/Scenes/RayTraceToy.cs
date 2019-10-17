@@ -78,13 +78,19 @@ namespace Solution12.Scenes
 
         public bool LineIntersectsLine(Line line, Line barrier, out Vector2 intersection)
         {
-            float intersectCoef = -1f;
             Vector2 lineSegment = line.end - line.start;
             Vector2 barrierSegment = barrier.end - barrier.start;
-            intersectCoef = Vector2Cross(line.start - barrier.start, lineSegment) / Vector2Cross(barrierSegment, lineSegment);
 
-            intersection = barrier.start + intersectCoef * barrierSegment;
-            return intersectCoef >= 0 && intersectCoef <= 1;
+            float barrierSegmentCrossLineSegment = Vector2Cross(barrierSegment, lineSegment);
+            float barrierIntersectCoef = Vector2Cross(line.start - barrier.start, lineSegment) / barrierSegmentCrossLineSegment;
+            float lineIntersectCoef = Vector2Cross(barrier.start - line.start, barrierSegment) / -barrierSegmentCrossLineSegment;
+
+            Console.WriteLine("========================================================================");
+            Console.WriteLine($"rxs = {Vector2Cross(barrierSegment, lineSegment)}");
+            Console.WriteLine($"sxr = {Vector2Cross(lineSegment, barrierSegment)}");
+
+            intersection = barrier.start + barrierIntersectCoef * barrierSegment;
+            return barrierIntersectCoef >= 0 && barrierIntersectCoef <= 1 && lineIntersectCoef >= 0 && lineIntersectCoef <= 1;
         }
 
         public float Vector2Cross(Vector2 vector1, Vector2 vector2)
