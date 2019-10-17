@@ -2,7 +2,7 @@
 using Emotion.Graphics.Command;
 using Emotion.Graphics.Objects;
 
-namespace Solution12.Scenes.Graphics.Command
+namespace Solution12.Graphics.Command
 {
     /// <summary>
     /// Render Command specifically for rendering a sprite between 4 specific vertices, as opposed to the default behaviour of <see cref="RenderSpriteCommand"/>,

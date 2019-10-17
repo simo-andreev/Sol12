@@ -2,14 +2,13 @@
 using System.Numerics;
 using Emotion.Common;
 using Emotion.Graphics;
-using Emotion.Graphics.Command;
 using Emotion.IO;
 using Emotion.Plugins.ImGuiNet;
 using Emotion.Primitives;
 using Emotion.Scenography;
 using Emotion.Utility;
 using ImGuiNET;
-using Solution12.Scenes.Graphics.Command;
+using Solution12.Graphics.Command;
 
 namespace Solution12.Scenes
 {

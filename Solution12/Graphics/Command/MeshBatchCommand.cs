@@ -6,11 +6,11 @@ using System.Numerics;
 using Emotion.Common;
 using Emotion.Graphics.Command;
 using Emotion.Graphics.Objects;
-using Solution12.Scenes.Graphics.Data;
+using Solution12.Graphics.Data;
 
 #endregion
 
-namespace Solution12.Scenes.Graphics.Command
+namespace Solution12.Graphics.Command
 {
     public class MeshBatchCommand : QuadBatch
     {

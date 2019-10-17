@@ -6,7 +6,7 @@ using Emotion.Graphics.Data;
 
 #endregion
 
-namespace Solution12.Scenes.Graphics.Data
+namespace Solution12.Graphics.Data
 {
     /// <summary>
     ///  A <see cref="VertexData"/> -like struct, that also stores a pre-calculated Normal Vector.
