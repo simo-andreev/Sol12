@@ -32,8 +32,8 @@ namespace Solution12.Scenes
         private TextureAsset _tileTexture;
         private ShaderAsset _shader;
 
-        private const int MAP_WIDTH = 100; // number of desired vertices on the "width" aka the pre-rotation 'X' axis.
-        private const int MAP_HEIGHT = 100; // number of desired vertices on the "height" aka the pre-rotation 'Y' axis.
+        private const int MAP_WIDTH = 50; // number of desired vertices on the "width" aka the pre-rotation 'X' axis.
+        private const int MAP_HEIGHT = 50; // number of desired vertices on the "height" aka the pre-rotation 'Y' axis.
         private static readonly Vector3 TileSize = new Vector3(32, 32, 16); // The size of individual tiles.
 
         // The height of the terrain.
@@ -79,70 +79,53 @@ namespace Solution12.Scenes
             _mouseScreenPos = Engine.Host.MousePosition;
         }
 
+        private Vector2 oldPosition = Vector2.Zero;
+
         public void Draw(RenderComposer composer)
         {
+            if (_rotation) composer.PushModelMatrix(_rotationMatrix);
+
             // This is basically what is visible on the screen as a bounding box in world space.
-            var worldClip = new Rectangle(Engine.Renderer.Camera.ScreenToWorld(new Vector2(0, 0)), Engine.Renderer.DrawBuffer.Size);
+            var worldClip = new Rectangle(Engine.Renderer.Camera.ScreenToWorld(new Vector2(50, 50)), new Vector2(600, 200));
+
+            // if (worldClip.Position != oldPosition)
+            // {
+            //     oldPosition = worldClip.Position;
+            //     Engine.Log.Warning("\t worldClip: " + oldPosition, "fml");
+            // }
+
             var worldClipStart = Vector2.Transform(worldClip.Position, _rotationMatrix);
             var worldClipEnd = Vector2.Transform(worldClip.Position + worldClip.Size, _rotationMatrix);
 
+            composer.RenderOutline(new Vector3(worldClip.Position.X, worldClip.Position.Y, 10), worldClip.Size, Color.Magenta, 2);
+
             _rendered = 0;
 
-            int yStart = (int) Maths.Clamp(MathF.Floor(worldClip.Y / TileSize.Y), 0, _heightMap.GetLength(1) - 1);
-            int yEnd = yStart + (int) Maths.Clamp(MathF.Ceiling(worldClip.Height / TileSize.Y), 0, _heightMap.GetLength(1) - 1);
-            int xStart = (int) Maths.Clamp(MathF.Floor(worldClip.X / TileSize.X), 0, _heightMap.GetLength(0) - 1);
-            int xEnd = xStart + (int) Maths.Clamp(MathF.Ceiling(worldClip.Width / TileSize.X), 0, _heightMap.GetLength(0) - 1);
+
+            // int xStartIndex = (int) Maths.Clamp(MathF.Floor(worldClip.X / TileSize.X), 0, _heightMap.GetLength(0) - 1);
+            // int xEndIndex = xStartIndex + (int) Maths.Clamp(MathF.Ceiling(worldClip.Width / TileSize.X), 0, _heightMap.GetLength(0) - 2);
+            //
+            // int yStartIndex = (int) Maths.Clamp(MathF.Floor(worldClip.Y / TileSize.Y), 0, _heightMap.GetLength(1) - 1);
+            // int yEndIndex = yStartIndex + (int) Maths.Clamp(MathF.Ceiling(worldClip.Height / TileSize.Y), 0, _heightMap.GetLength(1) - 2);
+
+            // safe values
+            // int xStartIndex = 0;
+            // int xEndIndex = _heightMap.GetLength(0) - 2;
+            //
+            // int yStartIndex = 0;
+            // int yEndIndex = _heightMap.GetLength(1) - 2;
+
+            int xStartIndex = (int) Math.Clamp(Math.Floor(worldClip.Position.X / TileSize.X), 0, _heightMap.GetLength(0) - 2);
+            int xEndIndex = (int) Math.Clamp(Math.Floor((worldClip.Position.X + worldClip.Width) / TileSize.X) + 1, 0, _heightMap.GetLength(0) - 2);
+
+            int yStartIndex = (int) Math.Clamp(Math.Floor(worldClip.Position.Y / TileSize.Y), 0, _heightMap.GetLength(1) - 2);
+            int yEndIndex = (int) Math.Clamp(Math.Floor((worldClip.Position.Y + worldClip.Height) / TileSize.X) + 1, 0, _heightMap.GetLength(1) - 2);
+
 
             // Drawing the terrain requires a custom batch which knows how to map MeshVertexData. (in the future the engine will handle variable vertex data)
-            composer.SetSpriteBatchType<VertexDataShaderMemorySpriteBatch>();
 
-            // int texturePointer = -1;
-            // var txtrAdded = composer.GetBatch().AddTextureBinding(_tileTexture.Texture.Pointer, out texturePointer);
-            // Debug.Assert(txtrAdded);
-            
-            if (_rotation) composer.PushModelMatrix(_rotationMatrix);
-
-            // for (var x = xStart; x < xEnd; x++)
-            // for (var y = yStart; y < yEnd; y++)
-            // {
-            //     _rendered++;
-            //     // Generate a Sprite RenderCommand for the current position vector, settings its bounds to the current and 3 'previous' vertexes
-            //     // This will #Push dat Render boi into the batch
-            //     var tileRenderCommand = new RenderVerticesCommand();
-            //
-            //     tileRenderCommand.AddVertex(new VertexData
-            //     {
-            //         Color = Color.White.ToUint(),
-            //         Vertex = new Vector3(x * TileSize.X, y * TileSize.Y, _heightMap[x, y]),
-            //         Tid = texturePointer
-            //     });
-            //
-            //     tileRenderCommand.AddVertex(new VertexData
-            //     {
-            //         Color = Color.White.ToUint(),
-            //         Vertex = new Vector3((x + 1) * TileSize.X, y * TileSize.Y, _heightMap[x + 1, y]),
-            //         Tid = texturePointer
-            //     });
-            //
-            //     tileRenderCommand.AddVertex(new VertexData
-            //     {
-            //         Color = Color.White.ToUint(),
-            //         Vertex = new Vector3((x + 1) * TileSize.X, (y + 1) * TileSize.Y, _heightMap[x + 1, y + 1]),
-            //         Tid = texturePointer
-            //     });
-            //     
-            //     tileRenderCommand.AddVertex(new VertexData
-            //     {
-            //         Color = Color.White.ToUint(),
-            //         Vertex = new Vector3(x * TileSize.X, (y + 1) * TileSize.Y, _heightMap[x, y + 1]),
-            //         Tid = texturePointer
-            //     });
-            //
-            //     composer.PushCommand(tileRenderCommand);
-            // }
-
-            for (var x = xStart; x < xEnd; x++)
-            for (var y = yStart; y < yEnd; y++)
+            for (var x = xStartIndex; x < xEndIndex; x++)
+            for (var y = yStartIndex; y < yEndIndex; y++)
             {
                 _rendered++;
                 // Generate a Sprite RenderCommand for the current position vector, settings its bounds to the current and 3 'previous' vertexes
@@ -154,7 +137,7 @@ namespace Solution12.Scenes
 
                 dataSpan[1].Vertex = new Vector3((x + 1) * TileSize.X, y * TileSize.Y, _heightMap[x + 1, y]);
                 dataSpan[1].Color = Color.White.ToUint();
-                dataSpan[1].UV = new Vector2(0,1);
+                dataSpan[1].UV = new Vector2(0, 1);
 
                 dataSpan[2].Vertex = new Vector3((x + 1) * TileSize.X, (y + 1) * TileSize.Y, _heightMap[x + 1, y + 1]);
                 dataSpan[2].Color = Color.White.ToUint();
@@ -162,20 +145,7 @@ namespace Solution12.Scenes
 
                 dataSpan[3].Vertex = new Vector3(x * TileSize.X, (y + 1) * TileSize.Y, _heightMap[x, y + 1]);
                 dataSpan[3].Color = Color.White.ToUint();
-                dataSpan[3].UV = new Vector2(1,0);
-
-                // VertexData.SpriteToVertexData(dataSpan, new Vector3(x * TileSize.X, y * TileSize.Y, _heightMap[x, y]), TileSize.ToVec2(), Color.White, _tileTexture.Texture);
-
-                // composer.PushCommand(new RenderTileCommand(
-                //     new Vector3(x * TileSize.X, y * TileSize.Y, _heightMap[x, y]),
-                //     new Vector3((x + 1) * TileSize.X, y * TileSize.Y, _heightMap[x + 1, y]),
-                //     new Vector3((x + 1) * TileSize.X, (y + 1) * TileSize.Y, _heightMap[x + 1, y + 1]),
-                //     new Vector3(x * TileSize.X, (y + 1) * TileSize.Y, _heightMap[x, y + 1]),
-                //     _tileTexture.Texture
-                // )
-                // {
-                //     Color = x == 0 && y == 0 ? Color.Red.ToUint() : Color.White.ToUint()
-                // });
+                dataSpan[3].UV = new Vector2(1, 0);
             }
 
             composer.SetDepthTest(false);
@@ -183,9 +153,9 @@ namespace Solution12.Scenes
             composer.RenderLine(new Vector2(20, 20), new Vector2(20, 30), Color.Green, 2);
             composer.RenderLine(new Vector2(20, 20), new Vector2(30, 20), Color.Red, 2);
             composer.RenderLine(new Vector3(20, 20, 0), new Vector3(20, 20, 30), Color.Blue, 10);
-            
+
             if (_rotation) composer.PopModelMatrix();
-            
+
             RenderGui(composer);
         }
 
