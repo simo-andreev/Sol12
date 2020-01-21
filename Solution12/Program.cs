@@ -84,8 +84,8 @@ internal class SolCam : CameraBase
         if (Engine.InputManager.IsKeyHeld(Key.D)) cameraMoveDirection.X += 1;
 
         // If mouse scroll-ed, note Zoom amount and direction
-        if (Engine.InputManager.GetMouseScrollRelative() == -1) Zoom += 0.035f * Engine.DeltaTime;
-        if (Engine.InputManager.GetMouseScrollRelative() == 1) Zoom -= 0.035f * Engine.DeltaTime;
+        if (Engine.InputManager.GetMouseScrollRelative() < 0) Zoom += 0.035f * Engine.DeltaTime;
+        if (Engine.InputManager.GetMouseScrollRelative() > 0) Zoom -= 0.035f * Engine.DeltaTime;
 
         // Clamp Camera Zoom
         if (Zoom > 6) Zoom = 6;
@@ -102,6 +102,8 @@ internal class SolCam : CameraBase
 
         // Finally apply the movement Vector to the camera.
         Engine.Renderer.Camera.Position += cameraMoveDirection;
+
+        if (Engine.InputManager.IsKeyHeld(Key.Home)) Engine.Renderer.Camera.Position = Vector3.Zero;
 
         // todo: Currently the matrix must be manually recreated as zooming doesn't trigger a recreation.
         RecreateMatrix();
