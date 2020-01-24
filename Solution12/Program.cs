@@ -25,10 +25,6 @@ namespace Solution12
                 .SetHostSettings(new Vector2(1270, 720))
             );
 
-            Engine.AssetLoader.AddSource(new FileAssetSource("assets/iMage"));
-            Engine.AssetLoader.AddSource(new FileAssetSource("assets/Font"));
-            Engine.AssetLoader.AddSource(new FileAssetSource("assets/SicBeats"));
-
             Engine.Renderer.FarZ = 600000; // TODO - Simo Andreev - 12.10.2019 - temp sht
             Engine.Renderer.NearZ = -600000; // TODO - Simo Andreev - 12.10.2019 - temp sht
             Engine.Renderer.Camera = new SolCam(new Vector3(0, 0, 0));
