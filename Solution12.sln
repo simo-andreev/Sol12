@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emotion", "..\Emotion\Emoti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emotion.Plugins.ImGuiNet", "..\Emotion\Emotion.Plugins.ImGuiNet\Emotion.Plugins.ImGuiNet.csproj", "{F64C8B23-7303-494B-9882-C3DF3A5CC369}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emotion.Tools", "..\Emotion\Emotion.Tools\Emotion.Tools.csproj", "{BBB0BA4B-FE1A-4543-9301-0DA01AFFFE2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{F64C8B23-7303-494B-9882-C3DF3A5CC369}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F64C8B23-7303-494B-9882-C3DF3A5CC369}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F64C8B23-7303-494B-9882-C3DF3A5CC369}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBB0BA4B-FE1A-4543-9301-0DA01AFFFE2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBB0BA4B-FE1A-4543-9301-0DA01AFFFE2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBB0BA4B-FE1A-4543-9301-0DA01AFFFE2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBB0BA4B-FE1A-4543-9301-0DA01AFFFE2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

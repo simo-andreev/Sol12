@@ -3,10 +3,12 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Emotion\Emotion.Plugins.ImGuiNet\Emotion.Plugins.ImGuiNet.csproj" />
+        <ProjectReference Include="..\..\Emotion\Emotion.Tools\Emotion.Tools.csproj" />
         <ProjectReference Include="..\..\Emotion\Emotion\Emotion.csproj" />
     </ItemGroup>
 
