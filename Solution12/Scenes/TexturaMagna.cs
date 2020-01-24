@@ -41,9 +41,6 @@ namespace Solution12.Scenes
         // The height of the terrain.
         private readonly float[,] _heightMap = new float[MAP_WIDTH, MAP_HEIGHT];
 
-        // Current location of the mouse pointer in ScreenSpace
-        private Vector2 _mouseScreenPos;
-
         private static readonly Vector3 RotationAngle = new Vector3(30, 50, 0);
 
         private readonly Matrix4x4 _rotationMatrix =
@@ -107,7 +104,6 @@ namespace Solution12.Scenes
 
         public void Update()
         {
-            _mouseScreenPos = Engine.Host.MousePosition;
             _menu.Update();
         }
 
@@ -117,26 +113,40 @@ namespace Solution12.Scenes
             _rendered = 0;
 
             _drawMemory.Clear();
-            quadTree.GetObjects(new Rectangle(Engine.Renderer.Camera.ScreenToWorld(Vector2.Zero), Engine.Configuration.RenderSize / Engine.Renderer.Camera.Zoom), ref _drawMemory);
+            var rect = new Rectangle(
+                Engine.Renderer.Camera.ScreenToWorld(Vector2.Zero),
+                Engine.Renderer.Camera.ScreenToWorld(Engine.Renderer.DrawBuffer.Size) * 2
+                // Engine.Configuration.RenderSize * (Engine.Renderer.Scale - (Engine.Renderer.IntScale - 1)) / Engine.Renderer.Camera.Zoom
+                );
+            quadTree.GetObjects(rect ,ref _drawMemory);
+            composer.RenderOutline(new Vector3(rect.Position, 0f), rect.Size, Color.CornflowerBlue, 2);
             _rendered = _drawMemory.Count;
-
+            
+            Engine.Log.Info("\t" + "Mouse position \t" + Engine.Host.MousePosition, "TAAAG");
             // ReSharper disable once ForCanBeConvertedToForeach
             for (var i = 0; i < _drawMemory.Count; i++)
             {
                 var tile = _drawMemory[i];
 
-                var c = new Color(0, 255, 0).ToUint();
+                var c = Color.White.ToUint();
 
                 var a = composer.GetBatch();
-                var data = a.GetData(null);
+                var data = a.GetData(_tileTexture.Texture);
                 data[0].Vertex = tile.Vertex0;
                 data[0].Color = c;
+                data[0].UV = Vector2.Zero;
+
                 data[1].Vertex = tile.Vertex1;
                 data[1].Color = c;
+                data[1].UV = new Vector2(1, 0);
+
                 data[2].Vertex = tile.Vertex2;
                 data[2].Color = c;
+                data[2].UV = new Vector2(1, 1);
+
                 data[3].Vertex = tile.Vertex3;
                 data[3].Color = c;
+                data[3].UV = new Vector2(0, 1);
             }
 
             composer.SetDepthTest(false);

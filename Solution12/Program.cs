@@ -27,7 +27,7 @@ namespace Solution12
 
             Engine.Renderer.FarZ = 600000; // TODO - Simo Andreev - 12.10.2019 - temp sht
             Engine.Renderer.NearZ = -600000; // TODO - Simo Andreev - 12.10.2019 - temp sht
-            Engine.Renderer.Camera = new SolCam(new Vector3(0, 0, 0));
+            // Engine.Renderer.Camera = new SolCam(new Vector3(0, 0, 0));
 
             Engine.SceneManager.SetScene(new SceneScene());
 
